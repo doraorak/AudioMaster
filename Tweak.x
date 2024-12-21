@@ -654,16 +654,7 @@ MRMediaRemoteGetNowPlayingApplicationIsPlaying(dispatch_get_main_queue(), comple
 BOOL (*setCategoryOriginal)(id, SEL, AVAudioSessionCategory, AVAudioSessionMode, AVAudioSessionCategoryOptions, NSError **);
 
 
-__attribute__ ((constructor(997)))
-void springBoardCheck(){ //we don't want to inject into springboard
 
-if ([safe_getBundleIdentifier() isEqualToString: @"com.apple.springboard"]){
-    return;
-}
-
-}
-
-__attribute__ ((constructor(998))) 
 void setup(){
     NSLog(@"[dora] consSetup");
     if (CFPreferencesCopyAppValue((__bridge CFStringRef)@"AMDontShowIncompatible", kCFPreferencesCurrentApplication) != kCFBooleanTrue) {
@@ -701,4 +692,29 @@ void setup(){
     
     MRMediaRemoteRegisterForNowPlayingNotifications(dispatch_get_main_queue());
     [[NSNotificationCenter defaultCenter] addObserver:menuViewController selector:@selector(updateResumeButton) name:(__bridge NSString *)kMRMediaRemoteNowPlayingApplicationIsPlayingDidChangeNotification object:nil];
+}
+
+extern void applyPersistance();
+
+bool isLikelyUIProcess() {
+    NSString *executablePath = NSProcessInfo.processInfo.arguments[0];
+
+    return [executablePath hasPrefix:@"/var/containers/Bundle/Application"] ||
+        [executablePath hasPrefix:@"/Applications"] ||
+        [executablePath containsString:@"/procursus/Applications"] ||
+        [executablePath hasSuffix:@"CoreServices/SpringBoard.app/SpringBoard"];
+}
+
+void springBoardCheck(){ //we don't want to inject into springboard
+
+if (!([safe_getBundleIdentifier() isEqualToString: @"com.apple.springboard"]) && isLikelyUIProcess()){
+    %init;
+    setup();
+    applyPersistance();
+}
+
+}
+
+%ctor{
+    springBoardCheck();
 }

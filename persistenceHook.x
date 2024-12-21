@@ -42,7 +42,6 @@ static void initHookGroup(void){
     %init(AVAudioSessionHookGroup);
 }
 
-__attribute__ ((constructor(999)))
 void applyPersistance(){
     NSLog(@"[dora] consPersistence");
     resumer = [musicResumer new];
