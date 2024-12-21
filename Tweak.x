@@ -705,7 +705,7 @@ bool isLikelyUIProcess() {
         [executablePath hasSuffix:@"CoreServices/SpringBoard.app/SpringBoard"];
 }
 
-void springBoardCheck(){ //we don't want to inject into springboard
+void initWhenInApp(){ //we don't want to inject into system processes
 
 if (!([safe_getBundleIdentifier() isEqualToString: @"com.apple.springboard"]) && isLikelyUIProcess()){
     %init;
@@ -716,5 +716,5 @@ if (!([safe_getBundleIdentifier() isEqualToString: @"com.apple.springboard"]) &&
 }
 
 %ctor{
-    springBoardCheck();
+    initWhenInApp();
 }
